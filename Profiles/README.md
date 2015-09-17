@@ -1,1 +1,1 @@
-Place Hadoop relevant python files into this directory.
+Place resulting mode profiles into this directory.
