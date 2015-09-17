@@ -5,3 +5,8 @@ The first mission of the *Cantorinus* project is to assemble rule based mode fin
 
 Once the rule based algorithms have been put into place, a large corpus based study will be conducted in order to create modal profiles for each of the rule based mode algorithm. The resulting mode profiles can then be used to determine the mode of unknown pieces.
 
+## Organization
+- Hadoop - contains relevant hadoop python files.
+- Profiles - contains the resulting modal profiles.
+- Rules - contains the rule based modal finding algorithms.
+
