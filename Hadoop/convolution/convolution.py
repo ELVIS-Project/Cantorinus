@@ -1,5 +1,11 @@
 import math
 
+edge_detection_kernel = [
+    [0.0, 1.0, 0.0],
+    [1.0, -4.0, 1.0],
+    [0.0, 1.0, 0.0]
+]
+
 def convolution(matrix, pixels, x, y, pixels_width, pixels_height):
     width = len(matrix)
     height = len(matrix[0])
@@ -63,3 +69,16 @@ def generate_gaussian_convolution_matrix(sigma, x, y, width, height):
 def gaussian(x, y, sigma):
     return (1 / math.sqrt(2 * math.pi * math.pow(sigma, 2))) * math.pow(math.e, (0 - (math.pow(x, 2) + math.pow(y, 2)) / (2 * math.pow(sigma, 2))))
 
+
+unsharp_kernel = [
+    [-1.0/256, -4.0/256, -6.0/256, -4.0/256, -1.0/256],
+    [-4.0/256, -16.0/256, -24.0/256, -16.0/256, -4.0/256],
+    [-6.0/256, -24.0/256, 476.0/256, -24.0/256, -6.0/256],
+    [-4.0/256, -16.0/256, -24.0/256, -16.0/256, -4.0/256],
+    [-1.0/256, -4.0/256, -6.0/256, -4.0/256, -1.0/256]
+]
+sharpening_kernel = [
+    [0, -1, 0],
+    [-1, 5, -1],
+    [0, -1, 0]
+]

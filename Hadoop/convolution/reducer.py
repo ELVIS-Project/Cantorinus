@@ -5,7 +5,7 @@ from PIL import Image
 
 reader = csv.reader(sys.stdin, delimiter='\t')
 
-size = (538, 439)
+size = (480, 480)
 
 output_image = Image.new("RGB", size, "white")
 pixels = output_image.load()
