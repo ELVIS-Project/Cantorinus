@@ -2,9 +2,17 @@ import music21
 from vis.analyzers.indexers import noterest
 
 
-# finds and returns note object of the last note in a part
-def final(part):
+# Rule 1: The final note in a melodic line. If the line ends on D, the mode is
+# first or second; E, third or fourth; F, fifth or sixth; G, seventh or eighth;
+# A, ninth or tenth; C, eleventh or twelfth. Each mode also has a Greek name.
 
+
+def finalis(part):
+
+    """
+    The finalis() function finds and returns a note object of the last note in
+    a part.
+    """
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
@@ -15,10 +23,23 @@ def final(part):
     return fin
 
 
-# returns note names of the upper and lower most notes in the part
-# can also return range (i.e. M11)?
-def pitch_range(part):
+# Rule 2: The range of the line. It is normally an octave, built either above
+# the final or above the fourth below the final. The former is the range of the
+# authentic, add-numbered modes; the latter the plagal, or even-numbered modes.
+# In the Greek nomenclature, the names of the plagal modes begin with the prefix
+# 'hypo-' ('below'). The last note (final) in a plagal melody lies in the
+# middle of the range; in an authentic melody, at the bottom. In practice,
+# the modal octave may be exceeded by a step at either end. If the melody goes
+# farther than that, the mode is called 'excessive'; if the melody covers both
+# the plagal and authentic ranges, its mode is said to be 'mixed'; if the melody
+# covers less than an octave, it is called 'incomplete.'
 
+
+def pitch_range(part):
+    """
+    The pitch_range() function returns note names of the upper and lower most
+    notes in the part.
+    """
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
@@ -87,8 +108,23 @@ def _merge(left, right):
     return result
 
 
-# finds the species of fourths and fifths used in the mode of the piece/part
+# The species of fourths and fifths. The types ('species') of fourth and fifth
+# are numbered according to the positions of the semitones and tones enclosed
+# within them (T = whole tone, S = semitone). For instance, the TTST fifth is
+# called a 'fourth species fifth' and it occurs in two locations in the natural
+# diatonic system (some species of interval only occur in one location). When a
+# species of interval is characteristic of more than one mode, the whole octave
+# must be examined to determine the mode. The species of fourth and fifth give
+# a mode its 'sound,' so you should learn to sing the different species and to
+# identify them aurally. The end points of the various species of interval can
+# be stressed by skipping to and from them or by using them as turning points
+# in a melody.
+
+
 def species(part, fin):
+    """
+    finds the species of fourths and fifths used in the mode of the piece/part
+    """
 
     if "Rest" in part:
         while "Rest" in part:
@@ -110,12 +146,13 @@ def species(part, fin):
 
     notes = _merge_sort(notes)
 
-    split = notes.index(fin)
+    # find the species of fifth based on where the final is
+    my_fin = notes.index(fin)
 
-    fifth = []
-    fourth = []
+    species_fifth = []
+    species_fourth = []
 
-    for x in range(split, split+4, 1):
+    for x in range(my_fin, my_fin+4, 1):
         intv = music21.interval.Interval(notes[x], notes[x+1])
         if intv.name == 'M2':
             intv = 'T'
@@ -123,26 +160,48 @@ def species(part, fin):
         elif intv.name == 'm2':
             intv = 'S'
 
-        fifth.append(intv)
+        species_fifth.append(intv)
         notes[x] = 0
 
-    # right now fourth only works if the range is exactly the range of the mode
-    # extra notes aren't being taken into account yet
-    for x in range(len(notes)-1):
+    fifth = 0
+    last = 0
+
+    if my_fin < 3:
+
+        fifth = my_fin + 4
+        last = fifth + 3
+
+    elif my_fin >= 3:
+
+        fifth = my_fin - 3
+        last = my_fin
+
+    for x in range(fifth, last, 1):
+
         if notes[x] is not 0 and notes[x+1] is not 0:
             intv = music21.interval.Interval(notes[x], notes[x+1])
             if intv.name == 'M2':
-                fourth.append('T')
+                species_fourth.append('T')
 
             elif intv.name == 'm2':
-                fourth.append('S')
+                species_fourth.append('S')
 
-    my_species = (fifth, fourth)
+
+    my_species = (species_fifth, species_fourth)
     return my_species
 
 
-# characteristic currently only finds the most frequently occurring note in the piece
+# Characteristic notes. The end points of the characteristic species of fourth
+# and fifth are the characteristic notes of the mode. They are always the final
+# and the fifth above (or the fourth below) the final. Thus if we hear or see a
+# melody that is continually emphasizing the notes E and B, we can be sure that
+# melody is either in the Phrygian mode or the Hypophrigian.
+
+
 def characteristic(part):
+    """
+    characteristic() finds and returns the most frequently occurring note
+    """
 
     note_freq = {}
 
@@ -160,11 +219,10 @@ def characteristic(part):
 
     return max(note_freq, key=note_freq.get)
 
-# a work in progress: picks the mode out of the list.
-# adds "hypo" if in opposite order?
-def mode(my_species):
 
-    modes = {
+def mode(fin, p_range, my_species, char):
+
+    mode_species = {
         'dorian': (['T', 'S', 'T', 'T'], ['T', 'S', 'T']),
         'phrygian': (['S', 'T', 'T', 'T'], ['S', 'T', 'T']),
         'lydian': (['T', 'T', 'T', 'S'], ['T', 'T', 'S']),
@@ -173,10 +231,34 @@ def mode(my_species):
         'ionian': (['T', 'T', 'S', 'T'], ['T', 'T', 'S'])
     }
 
-    for each in modes:
-        if my_species == modes[each]:
-            print each
+    for each in mode_species:
+        if my_species == mode_species[each]:
+            print('species thinks: '), (each)
 
+    mode_finalis = {
+        'D': 'dorian',
+        'E': 'phrygian',
+        'F': 'lydian',
+        'G': 'mixolydian',
+        'A': 'aeolian',
+        'C': 'ionian'
+    }
+
+    mode_charac = {
+        'D': ('dorian', 'mixolydian'),
+        'E': ('phrygian', 'aeolian'),
+        'F': 'lydian',
+        'G': ('mixolydian', 'ionian'),
+        'A': ('aeolian', 'dorian'),
+        'C': ('ionian', 'lydian')
+    }
+
+    if fin.name in mode_finalis:
+        print('finalis thinks: '), (mode_finalis[fin.name])
+
+    if char in mode_charac:
+        print('characteristic note thinks: '), (mode_charac[char])
+        
 
 def main():
 
@@ -189,7 +271,7 @@ def main():
 
     for piece in pieces:
 
-        print piece
+        print(piece)
 
         the_score = music21.converter.parse(piece)
         the_notes = noterest.NoteRestIndexer(the_score).run()
@@ -198,17 +280,17 @@ def main():
 
             part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
 
-            fin = final(part_notes)
+            fin = finalis(part_notes)
             p_range = pitch_range(the_score.parts[x])
             my_species = species(part_notes, fin)
             char = characteristic(part_notes)
 
-            print 'final: ', fin.nameWithOctave
-            print 'range: ', p_range
-            print 'species: ', my_species
-            print 'characteristic note: ', char
+            print('final: '), (fin.nameWithOctave)
+            print('range: '), (p_range)
+            print('species: '), (my_species)
+            print('characteristic note: '), (char)
 
-            mode(my_species)
+            mode(fin, p_range, my_species, char)
 
 
 if __name__ == '__main__':
