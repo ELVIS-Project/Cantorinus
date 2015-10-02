@@ -2,9 +2,16 @@ import music21
 from vis.analyzers.indexers import noterest
 
 
-# finds and returns note object of the last note in a part
 def final(part):
+    '''
+    Write documentation comments here. That way they are available
+    via the final.__doc__ string function or the help(final) function. 
+    We added this to the [code guidelines](https://ddmal.music.mcgill.ca/lab-coding-guidelines).
 
+    So here:
+    The final function finds and returns note object of the last 
+    note in a part.
+    '''
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
