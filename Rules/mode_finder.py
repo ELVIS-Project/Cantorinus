@@ -1,87 +1,214 @@
-import music21 as m
-from vis.models.indexed_piece import IndexedPiece
-from vis.analyzers.indexers import noterest, offset, interval
+import music21
+from vis.analyzers.indexers import noterest
 
 
+# finds and returns note object of the last note in a part
 def final(part):
-
-    last = len(part) - 1
-
-    fin = m.note.Note(part[last])
-    # print fin.nameWithOctave
-    return fin
-
-
-def pitch_range(part, fin):
-
-    p = m.analysis.discrete.Ambitus()
-    # print p.getSolution(part)
-    # print p.getPitchSpan(part)
-
-
-def species(part, fin):
-
-    notes = []
 
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
 
+    last = len(part) - 1
+
+    fin = music21.note.Note(part[last])
+    return fin
+
+
+# returns note names of the upper and lower most notes in the part
+# can also return range (i.e. M11)?
+def pitch_range(part):
+
+    if "Rest" in part:
+        while "Rest" in part:
+            part.remove("Rest")
+
+    p = music21.analysis.discrete.Ambitus()
+    p_range = p.getPitchSpan(part)
+    return p_range[0].nameWithOctave, p_range[1].nameWithOctave
+
+
+def _merge_sort(notes):
+
+    if len(notes) <= 1:
+        return notes
+
+    left = []
+    right = []
+
+    mid = len(notes)/2
+
+    for x in range(0, mid, 1):
+        left.append(notes[x])
+
+    for x in range(mid, len(notes), 1):
+        right.append(notes[x])
+
+    left = _merge_sort(left)
+    right = _merge_sort(right)
+
+    return _merge(left, right)
+
+
+def _merge(left, right):
+
+    result = []
+
+    l = 0
+    r = 0
+    short = 0
+
+    if len(left) < len(right):
+        short += len(left)
+
+    else:
+        short += len(right)
+
+    while l < short and r < short:
+
+        if music21.interval.getAbsoluteLowerNote(left[l], right[r]) == left[l]:
+            result.append(left[l])
+            l += 1
+
+        else:
+            result.append(right[r])
+            r += 1
+
+    if l < len(left):
+        while l < len(left):
+            result.append(left[l])
+            l += 1
+
+    if r < len(right):
+        while r < len(right):
+            result.append(right[r])
+            r += 1
+
+    return result
+
+
+# finds the species of fourths and fifths used in the mode of the piece/part
+def species(part, fin):
+
+    if "Rest" in part:
+        while "Rest" in part:
+            part.remove("Rest")
+
+    notes = []
+
     for note in part:
-        notes.append(m.note.Note(note).name)
 
-    notes = sorted(list(set(notes)))
+        note = music21.note.Note(note)
 
-    ind = notes.index(fin.name)
-    octave = []
-    new = []
+        new = True
+        for x in range(len(notes)):
+            if notes[x].nameWithOctave == note.nameWithOctave:
+                new = False
 
-    for x in range(ind, len(notes), 1):
-        new.append(notes[x])
-    for x in range(0, ind, 1):
-        new.append(notes[x])
+        if new:
+            notes.append(note)
 
-    octv = 4
+    notes = _merge_sort(notes)
 
-    for pitch in new:
+    split = notes.index(fin)
 
-        if pitch == 'C':
-            octv += 1
+    fifth = []
+    fourth = []
 
-        n = m.note.Note(pitch)
-        n.octave = octv
-        octave.append(n)
+    for x in range(split, split+4, 1):
+        intv = music21.interval.Interval(notes[x], notes[x+1])
+        if intv.name == 'M2':
+            intv = 'T'
 
-    n = m.note.Note(octave[0].name)
-    n.octave = octv
-    octave.append(n)
+        elif intv.name == 'm2':
+            intv = 'S'
 
-    intervals = []
-    for x in range(len(octave)-1):
+        fifth.append(intv)
+        notes[x] = 0
 
-        intv = m.interval.Interval(octave[x], octave[x+1])
-        intervals.append(intv)
+    # right now fourth only works if the range is exactly the range of the mode
+    # extra notes aren't being taken into account yet
+    for x in range(len(notes)-1):
+        if notes[x] is not 0 and notes[x+1] is not 0:
+            intv = music21.interval.Interval(notes[x], notes[x+1])
+            if intv.name == 'M2':
+                fourth.append('T')
 
-    print intervals
+            elif intv.name == 'm2':
+                fourth.append('S')
+
+    my_species = (fifth, fourth)
+    return my_species
 
 
+# characteristic currently only finds the most frequently occurring note in the piece
+def characteristic(part):
 
-# def characteristic():
+    note_freq = {}
+
+    for note in part:
+
+        if note is 'Rest':
+            pass
+        else:
+            note = music21.note.Note(note)
+
+        if note.name in note_freq:
+            note_freq[note.name] += 1
+        else:
+            note_freq[note.name] = 1
+
+    return max(note_freq, key=note_freq.get)
+
+# a work in progress: picks the mode out of the list.
+# adds "hypo" if in opposite order?
+def mode(my_species):
+
+    modes = {
+        'dorian': (['T', 'S', 'T', 'T'], ['T', 'S', 'T']),
+        'phrygian': (['S', 'T', 'T', 'T'], ['S', 'T', 'T']),
+        'lydian': (['T', 'T', 'T', 'S'], ['T', 'T', 'S']),
+        'mixolydian': (['T', 'T', 'S', 'T'], ['T', 'S', 'T']),
+        'aeolian': (['T', 'S', 'T', 'T'], ['S', 'T', 'T']),
+        'ionian': (['T', 'T', 'S', 'T'], ['T', 'T', 'S'])
+    }
+
+    for each in modes:
+        if my_species == modes[each]:
+            print each
 
 
 def main():
 
     piece = 'Cantorinus/Rules/music/lhomme_arme.mei'
+    piece1 = 'Cantorinus/Rules/music/kyrie_cumjubilo.mei'
+    piece2 = 'Cantorinus/Rules/music/kyrie_deangelis.mei'
+    piece3 = 'Cantorinus/Rules/music/christlag.mei'
 
-    the_score = m.converter.parse(piece)
-    the_notes = noterest.NoteRestIndexer(the_score).run()
+    pieces = [piece, piece1, piece2, piece3]
 
-    for x in range(len(the_score.parts)):
+    for piece in pieces:
 
-        part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
-        fin = final(part_notes)
-        pitch_range(the_score.parts[x], fin)
-        species(part_notes, fin)
+        print piece
+
+        the_score = music21.converter.parse(piece)
+        the_notes = noterest.NoteRestIndexer(the_score).run()
+
+        for x in range(len(the_score.parts)):
+
+            part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
+
+            fin = final(part_notes)
+            p_range = pitch_range(the_score.parts[x])
+            my_species = species(part_notes, fin)
+            char = characteristic(part_notes)
+
+            print 'final: ', fin.nameWithOctave
+            print 'range: ', p_range
+            print 'species: ', my_species
+            print 'characteristic note: ', char
+
+            mode(my_species)
 
 
 if __name__ == '__main__':
