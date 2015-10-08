@@ -120,6 +120,24 @@ def _merge(left, right):
 # be stressed by skipping to and from them or by using them as turning points
 # in a melody.
 
+def smaller(part, note1, note2):
+
+    note1_tally = 0
+    note2_tally = 0
+
+    for note in part:
+        if note == note1.name:
+            note1_tally += 1
+
+        elif note == note2.name:
+            note2_tally += 1
+
+    if note1_tally < note2_tally:
+        return note1
+
+    else:
+        return note2
+
 
 def species(part, fin):
     """
@@ -146,21 +164,54 @@ def species(part, fin):
 
     notes = _merge_sort(notes)
 
+    print(notes)
+
+    # smallish = []
+    # for x in range(len(notes)):
+    #     for y in range(x, len(notes), 1):
+    #         if notes[x].name[0] == notes[y].name[0]:
+    #             small = smaller(part, notes[x], notes[y])
+    #             print small
+    #             smallish.append(small)
+    #
+    # print smallish
+    # for small in smallish:
+    #     notes.remove(small)
+
     # find the species of fifth based on where the final is
     my_fin = notes.index(fin)
 
     species_fifth = []
     species_fourth = []
 
-    for x in range(my_fin, my_fin+4, 1):
+    for note in notes:
+        if music21.interval.Interval(note, fin).name == 'P5':
+            print(fin), (note)
+            end = notes.index(note)
+
+    smalls = []
+    for x in range(len(notes)-1):
+        if notes[x].name[0] == notes[x+1].name[0]:
+            small = smaller(part, notes[x], notes[x+1])
+            smalls.append(small)
+
+    for small in smalls:
+        notes.remove(small)
+
+    notes = _merge_sort(notes)
+
+    for x in range(my_fin, end, 1):
         intv = music21.interval.Interval(notes[x], notes[x+1])
+        print notes[x], notes[x+1]
+        print intv.name
         if intv.name == 'M2':
             intv = 'T'
+            species_fifth.append(intv)
 
         elif intv.name == 'm2':
             intv = 'S'
+            species_fifth.append(intv)
 
-        species_fifth.append(intv)
         notes[x] = 0
 
     fifth = 0
@@ -175,17 +226,6 @@ def species(part, fin):
 
         fifth = my_fin - 3
         last = my_fin
-
-    for x in range(fifth, last, 1):
-
-        if notes[x] is not 0 and notes[x+1] is not 0:
-            intv = music21.interval.Interval(notes[x], notes[x+1])
-            if intv.name == 'M2':
-                species_fourth.append('T')
-
-            elif intv.name == 'm2':
-                species_fourth.append('S')
-
 
     my_species = (species_fifth, species_fourth)
     return my_species
@@ -262,12 +302,16 @@ def mode(fin, p_range, my_species, char):
 
 def main():
 
-    piece = 'Cantorinus/Rules/music/lhomme_arme.mei'
-    piece1 = 'Cantorinus/Rules/music/kyrie_cumjubilo.mei'
-    piece2 = 'Cantorinus/Rules/music/kyrie_deangelis.mei'
-    piece3 = 'Cantorinus/Rules/music/christlag.mei'
-
-    pieces = [piece, piece1, piece2, piece3]
+    pieces = {
+        'Cantorinus/Rules/music/lhomme_arme.mei': 'mixolydian',
+        'Cantorinus/Rules/music/kyrie_cumjubilo.mei': 'dorian & hypodorian',
+        'Cantorinus/Rules/music/kyrie_deangelis.mei': 'lydian',
+        'Cantorinus/Rules/music/christlag.mei': 'dorian',
+        'Cantorinus/Rules/music/kyrie_dedominica.mei': 'aeolian',
+        'Cantorinus/Rules/music/la_spagna.mei': 'dorian',
+        'Cantorinus/Rules/music/vater_unser.mei': 'dorian',
+        'Cantorinus/Rules/music/da_jesus.mei': 'phrygian'
+    }
 
     for piece in pieces:
 
@@ -285,12 +329,13 @@ def main():
             my_species = species(part_notes, fin)
             char = characteristic(part_notes)
 
-            print('final: '), (fin.nameWithOctave)
-            print('range: '), (p_range)
-            print('species: '), (my_species)
-            print('characteristic note: '), (char)
-
-            mode(fin, p_range, my_species, char)
+            # print('actual: '), (pieces[piece])
+            # print('final: '), (fin.nameWithOctave)
+            # print('range: '), (p_range)
+            # print('species: '), (my_species)
+            # print('characteristic note: '), (char)
+            #
+            # mode(fin, p_range, my_species, char)
 
 
 if __name__ == '__main__':
