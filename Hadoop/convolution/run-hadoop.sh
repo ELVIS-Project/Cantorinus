@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-hadoop jar #HADOOP_STREAM \
+hadoop jar $HADOOP_STREAM \
 -files mapper.py, reducer.py \
 -mapper mapper.py \
 -reducer reducer.py \
