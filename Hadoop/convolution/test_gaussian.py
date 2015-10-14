@@ -1,8 +1,8 @@
 from ast import literal_eval
-import convolution
 from PIL import Image
 import csv
 import sys
+from convolution import convolution
 
 width, height = 512, 512
 

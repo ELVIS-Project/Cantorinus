@@ -53,7 +53,7 @@ def generate_centered_gaussian_convolution_matrix(sigma, width, height):
 
 def generate_gaussian_convolution_matrix(sigma, x, y, width, height):
     total = 0
-    output = [[0 for output_y in xrange(height)] for output_x in xrange(width)]
+    output = [[0 for output_y in range(height)] for output_x in range(width)]
     for i in range(width):
         for j in range(height):
             # print abs(i - x), abs(j - y)
