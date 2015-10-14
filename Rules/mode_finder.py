@@ -17,10 +17,10 @@ def finalis(part):
         while "Rest" in part:
             part.remove("Rest")
 
+    # finds the last pitch (that is not a Rest) in the part
     last = len(part) - 1
 
-    fin = music21.note.Note(part[last])
-    return fin
+    return music21.note.Note(part[last])
 
 
 # Rule 2: The range of the line. It is normally an octave, built either above
@@ -46,7 +46,7 @@ def pitch_range(part):
 
     p = music21.analysis.discrete.Ambitus()
     p_range = p.getPitchSpan(part)
-    return p_range[0].nameWithOctave, p_range[1].nameWithOctave
+    return p_range[0], p_range[1]
 
 
 def _merge_sort(notes):
@@ -68,6 +68,12 @@ def _merge_sort(notes):
     left = _merge_sort(left)
     right = _merge_sort(right)
 
+    lst = len(left)-1
+
+    if music21.interval.getAbsoluteLowerNote(left[lst], right[0]) == left[lst]:
+        left.extend(right)
+        return left
+
     return _merge(left, right)
 
 
@@ -75,35 +81,20 @@ def _merge(left, right):
 
     result = []
 
-    l = 0
-    r = 0
-    short = 0
-
-    if len(left) < len(right):
-        short += len(left)
-
-    else:
-        short += len(right)
-
-    while l < short and r < short:
-
-        if music21.interval.getAbsoluteLowerNote(left[l], right[r]) == left[l]:
-            result.append(left[l])
-            l += 1
+    while len(left) > 0 and len(right) > 0:
+        if music21.interval.getAbsoluteLowerNote(left[0], right[0]) == left[0]:
+            result.append(left[0])
+            left.remove(left[0])
 
         else:
-            result.append(right[r])
-            r += 1
+            result.append(right[0])
+            right.remove(right[0])
 
-    if l < len(left):
-        while l < len(left):
-            result.append(left[l])
-            l += 1
+    if len(left) > 0:
+        result.extend(left)
 
-    if r < len(right):
-        while r < len(right):
-            result.append(right[r])
-            r += 1
+    if len(right) > 0:
+        result.extend(right)
 
     return result
 
@@ -119,6 +110,93 @@ def _merge(left, right):
 # identify them aurally. The end points of the various species of interval can
 # be stressed by skipping to and from them or by using them as turning points
 # in a melody.
+
+def species(part, fin, r_type):
+
+    notes = spec_prep(part)
+
+    fifth = []
+    start = notes.index(fin)
+    stop = start + 4
+
+    for note in notes:
+
+        if music21.interval.Interval(note, fin) == 'P5':
+            stop = notes.index(note)
+
+    for x in range(start, stop+1, 1):
+
+        fifth.append(notes[x])
+
+    fourth = []
+
+    if r_type == 'authentic':
+
+        f_start = stop
+        f_stop = len(notes)
+
+        for note in notes:
+            if music21.interval.Interval(fin, note).name == 'P8':
+                f_stop = notes.index(note) + 1
+
+    else:
+
+        f_start = start - 4
+        f_stop = start
+
+    for x in range(f_start, f_stop, 1):
+        fourth.append(notes[x])
+
+    fif_intv = []
+    fou_intv = []
+
+    for x in range(len(fifth)-1):
+        f_intv = music21.interval.Interval(fifth[x], fifth[x+1])
+        if f_intv.name == 'm2':
+            fif_intv.append('S')
+        elif f_intv.name == 'M2':
+            fif_intv.append('T')
+
+    for x in range(len(fourth)-1):
+        f_intv = music21.interval.Interval(fourth[x], fourth[x+1])
+        if f_intv.name == 'm2':
+            fou_intv.append('S')
+        elif f_intv.name == 'M2':
+            fou_intv.append('T')
+
+    return [fif_intv, fou_intv]
+
+
+def spec_prep(part):
+
+    notes = []
+
+    for note in part:
+
+        if note == "Rest":
+            pass
+        else:
+            note = music21.note.Note(note)
+
+        if note in notes:
+            pass
+        else:
+            notes.append(note)
+
+    notes = _merge_sort(notes)
+
+    rep = []
+
+    for x in range(len(notes)-1):
+
+        if notes[x].name[0] == notes[x+1].name[0]:
+            rep.append(smaller(part, notes[x], notes[x+1]))
+
+    for note in rep:
+        notes.remove(note)
+
+    return notes
+
 
 def smaller(part, note1, note2):
 
@@ -137,98 +215,6 @@ def smaller(part, note1, note2):
 
     else:
         return note2
-
-
-def species(part, fin):
-    """
-    finds the species of fourths and fifths used in the mode of the piece/part
-    """
-
-    if "Rest" in part:
-        while "Rest" in part:
-            part.remove("Rest")
-
-    notes = []
-
-    for note in part:
-
-        note = music21.note.Note(note)
-
-        new = True
-        for x in range(len(notes)):
-            if notes[x].nameWithOctave == note.nameWithOctave:
-                new = False
-
-        if new:
-            notes.append(note)
-
-    notes = _merge_sort(notes)
-
-    print(notes)
-
-    # smallish = []
-    # for x in range(len(notes)):
-    #     for y in range(x, len(notes), 1):
-    #         if notes[x].name[0] == notes[y].name[0]:
-    #             small = smaller(part, notes[x], notes[y])
-    #             print small
-    #             smallish.append(small)
-    #
-    # print smallish
-    # for small in smallish:
-    #     notes.remove(small)
-
-    # find the species of fifth based on where the final is
-    my_fin = notes.index(fin)
-
-    species_fifth = []
-    species_fourth = []
-
-    for note in notes:
-        if music21.interval.Interval(note, fin).name == 'P5':
-            print(fin), (note)
-            end = notes.index(note)
-
-    smalls = []
-    for x in range(len(notes)-1):
-        if notes[x].name[0] == notes[x+1].name[0]:
-            small = smaller(part, notes[x], notes[x+1])
-            smalls.append(small)
-
-    for small in smalls:
-        notes.remove(small)
-
-    notes = _merge_sort(notes)
-
-    for x in range(my_fin, end, 1):
-        intv = music21.interval.Interval(notes[x], notes[x+1])
-        print notes[x], notes[x+1]
-        print intv.name
-        if intv.name == 'M2':
-            intv = 'T'
-            species_fifth.append(intv)
-
-        elif intv.name == 'm2':
-            intv = 'S'
-            species_fifth.append(intv)
-
-        notes[x] = 0
-
-    fifth = 0
-    last = 0
-
-    if my_fin < 3:
-
-        fifth = my_fin + 4
-        last = fifth + 3
-
-    elif my_fin >= 3:
-
-        fifth = my_fin - 3
-        last = my_fin
-
-    my_species = (species_fifth, species_fourth)
-    return my_species
 
 
 # Characteristic notes. The end points of the characteristic species of fourth
@@ -260,46 +246,6 @@ def characteristic(part):
     return max(note_freq, key=note_freq.get)
 
 
-def mode(fin, p_range, my_species, char):
-
-    mode_species = {
-        'dorian': (['T', 'S', 'T', 'T'], ['T', 'S', 'T']),
-        'phrygian': (['S', 'T', 'T', 'T'], ['S', 'T', 'T']),
-        'lydian': (['T', 'T', 'T', 'S'], ['T', 'T', 'S']),
-        'mixolydian': (['T', 'T', 'S', 'T'], ['T', 'S', 'T']),
-        'aeolian': (['T', 'S', 'T', 'T'], ['S', 'T', 'T']),
-        'ionian': (['T', 'T', 'S', 'T'], ['T', 'T', 'S'])
-    }
-
-    for each in mode_species:
-        if my_species == mode_species[each]:
-            print('species thinks: '), (each)
-
-    mode_finalis = {
-        'D': 'dorian',
-        'E': 'phrygian',
-        'F': 'lydian',
-        'G': 'mixolydian',
-        'A': 'aeolian',
-        'C': 'ionian'
-    }
-
-    mode_charac = {
-        'D': ('dorian', 'mixolydian'),
-        'E': ('phrygian', 'aeolian'),
-        'F': 'lydian',
-        'G': ('mixolydian', 'ionian'),
-        'A': ('aeolian', 'dorian'),
-        'C': ('ionian', 'lydian')
-    }
-
-    if fin.name in mode_finalis:
-        print('finalis thinks: '), (mode_finalis[fin.name])
-
-    if char in mode_charac:
-        print('characteristic note thinks: '), (mode_charac[char])
-        
-
 def main():
 
     pieces = {
@@ -326,16 +272,18 @@ def main():
 
             fin = finalis(part_notes)
             p_range = pitch_range(the_score.parts[x])
-            my_species = species(part_notes, fin)
-            char = characteristic(part_notes)
+            r_type = 'authentic'
+            my_species = species(part_notes, fin, r_type)
+            char_note = characteristic(part_notes)
+
 
             # print('actual: '), (pieces[piece])
-            # print('final: '), (fin.nameWithOctave)
+            # print('final: '), (fin)
             # print('range: '), (p_range)
-            # print('species: '), (my_species)
-            # print('characteristic note: '), (char)
-            #
-            # mode(fin, p_range, my_species, char)
+            print('species: '), (my_species)
+            # print('characteristic note: '), (char_note)
+
+            # mode(fin, p_range, my_species, char_note)
 
 
 if __name__ == '__main__':
