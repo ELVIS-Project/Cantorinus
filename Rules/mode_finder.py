@@ -230,35 +230,40 @@ def characteristic(part):
     characteristic() finds and returns the most frequently occurring note
     """
 
-    note_freq = {}
+    # note_freq = {}
+    #
+    # for note in part:
+    #     print note
+    #
+    #     if note is 'Rest':
+    #         pass
+    #     else:
+    #         note = music21.note.Note(note)
+    #         print note.duration
+    #
+    #         if note.name in note_freq:
+    #             note_freq[note.name] += 1
+    #         else:
+    #             note_freq[note.name] = 1
+    #
+    # print max(note_freq, key=note_freq.get)
 
-    for note in part:
-
-        if note is 'Rest':
-            pass
-        else:
-            note = music21.note.Note(note)
-
-            if note.name in note_freq:
-                note_freq[note.name] += 1
-            else:
-                note_freq[note.name] = 1
-
-    return max(note_freq, key=note_freq.get)
+    print len(part.notes)
 
 
 def main():
 
-    pieces = {
-        'Cantorinus/Rules/music/lhomme_arme.mei': 'mixolydian',
-        'Cantorinus/Rules/music/kyrie_cumjubilo.mei': 'dorian & hypodorian',
-        'Cantorinus/Rules/music/kyrie_deangelis.mei': 'lydian',
-        'Cantorinus/Rules/music/christlag.mei': 'dorian',
-        'Cantorinus/Rules/music/kyrie_dedominica.mei': 'aeolian',
-        'Cantorinus/Rules/music/la_spagna.mei': 'dorian',
-        'Cantorinus/Rules/music/vater_unser.mei': 'dorian',
-        'Cantorinus/Rules/music/da_jesus.mei': 'phrygian'
-    }
+    # pieces = {
+    #     'Cantorinus/Rules/music/lhomme_arme.mei': 'mixolydian',
+    #     'Cantorinus/Rules/music/kyrie_cumjubilo.mei': 'dorian & hypodorian',
+    #     'Cantorinus/Rules/music/kyrie_deangelis.mei': 'lydian',
+    #     'Cantorinus/Rules/music/christlag.mei': 'dorian',
+    #     'Cantorinus/Rules/music/kyrie_dedominica.mei': 'aeolian',
+    #     'Cantorinus/Rules/music/la_spagna.mei': 'dorian',
+    #     'Cantorinus/Rules/music/vater_unser.mei': 'dorian',
+    #     'Cantorinus/Rules/music/da_jesus.mei': 'phrygian'
+    # }
+    pieces = ['Cantorinus/Rules/music/lhomme_arme.mei', 'Cantorinus/Rules/music/L_homme_arme.mxl']
 
     for piece in pieces:
 
@@ -270,23 +275,29 @@ def main():
         # currently assuming that the piece only has one part
         part_notes = the_notes['noterest.NoteRestIndexer']['0'].tolist()
 
-        fin = finalis(part_notes)
-        p_range = pitch_range(the_score.parts[0])
-        p_range = p_range[0].nameWithOctave, p_range[1].nameWithOctave
-        r_type = 'authentic'
-        my_species = species(part_notes, fin, r_type)
-        char_note = characteristic(part_notes)
+        characteristic(part_notes)
 
-        with open(piece + '.csv', 'wb') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow([
-                'finalis',
-                'pitch range',
-                'range type',
-                'species',
-                'characteristic note'
-                ])
-            writer.writerow([fin.name, p_range, r_type, my_species, char_note])
+        # fin = finalis(part_notes)
+        # p_range = pitch_range(the_score.parts[0])
+        # p_range = p_range[0].nameWithOctave, p_range[1].nameWithOctave
+        # r_type = 'authentic'
+        #
+        # with open(piece + '.csv', 'wb') as csvfile:
+        #     writer = csv.writer(csvfile)
+        #     writer.writerow([
+        #         'finalis',
+        #         'pitch range',
+        #         'range type',
+        #         'species',
+        #         'characteristic note'
+        #         ])
+        #     writer.writerow([
+        #         fin.name,
+        #         p_range,
+        #         r_type,
+        #         species(part_notes, fin, r_type),
+        #         characteristic(part_notes)
+        #     ])
 
 
 if __name__ == '__main__':
