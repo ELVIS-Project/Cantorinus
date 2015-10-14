@@ -1,3 +1,5 @@
+#!/usr/bin/env ../app_env/bin/python
+
 from ast import literal_eval
 from PIL import Image
 import csv

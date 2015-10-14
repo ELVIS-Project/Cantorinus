@@ -1,3 +1,5 @@
+#!/usr/bin/env ../app_env/bin/python
+
 import sys
 import csv
 from PIL import Image
