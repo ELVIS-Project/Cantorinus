@@ -1,5 +1,6 @@
 import music21
 from vis.analyzers.indexers import noterest
+import csv
 
 
 # Rule 1: The final note in a melodic line. If the line ends on D, the mode is
@@ -164,7 +165,7 @@ def species(part, fin, r_type):
         elif f_intv.name == 'M2':
             fou_intv.append('T')
 
-    return [fif_intv, fou_intv]
+    return fif_intv, fou_intv
 
 
 def spec_prep(part):
@@ -178,10 +179,10 @@ def spec_prep(part):
         else:
             note = music21.note.Note(note)
 
-        if note in notes:
-            pass
-        else:
-            notes.append(note)
+            if note in notes:
+                pass
+            else:
+                notes.append(note)
 
     notes = _merge_sort(notes)
 
@@ -238,10 +239,10 @@ def characteristic(part):
         else:
             note = music21.note.Note(note)
 
-        if note.name in note_freq:
-            note_freq[note.name] += 1
-        else:
-            note_freq[note.name] = 1
+            if note.name in note_freq:
+                note_freq[note.name] += 1
+            else:
+                note_freq[note.name] = 1
 
     return max(note_freq, key=note_freq.get)
 
@@ -266,24 +267,26 @@ def main():
         the_score = music21.converter.parse(piece)
         the_notes = noterest.NoteRestIndexer(the_score).run()
 
-        for x in range(len(the_score.parts)):
+        # currently assuming that the piece only has one part
+        part_notes = the_notes['noterest.NoteRestIndexer']['0'].tolist()
 
-            part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
+        fin = finalis(part_notes)
+        p_range = pitch_range(the_score.parts[0])
+        p_range = p_range[0].nameWithOctave, p_range[1].nameWithOctave
+        r_type = 'authentic'
+        my_species = species(part_notes, fin, r_type)
+        char_note = characteristic(part_notes)
 
-            fin = finalis(part_notes)
-            p_range = pitch_range(the_score.parts[x])
-            r_type = 'authentic'
-            my_species = species(part_notes, fin, r_type)
-            char_note = characteristic(part_notes)
-
-
-            # print('actual: '), (pieces[piece])
-            # print('final: '), (fin)
-            # print('range: '), (p_range)
-            print('species: '), (my_species)
-            # print('characteristic note: '), (char_note)
-
-            # mode(fin, p_range, my_species, char_note)
+        with open(piece + '.csv', 'wb') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([
+                'finalis',
+                'pitch range',
+                'range type',
+                'species',
+                'characteristic note'
+                ])
+            writer.writerow([fin.name, p_range, r_type, my_species, char_note])
 
 
 if __name__ == '__main__':
