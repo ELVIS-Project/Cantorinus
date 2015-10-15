@@ -227,28 +227,30 @@ def smaller(part, note1, note2):
 
 def characteristic(part):
     """
-    characteristic() finds and returns the most frequently occurring note
+    characteristic() finds and returns the 'characteristic' note, a note that
+    occurs often and has the longest total duration of being played
     """
 
-    # note_freq = {}
-    #
-    # for note in part:
-    #     print note
-    #
-    #     if note is 'Rest':
-    #         pass
-    #     else:
-    #         note = music21.note.Note(note)
-    #         print note.duration
-    #
-    #         if note.name in note_freq:
-    #             note_freq[note.name] += 1
-    #         else:
-    #             note_freq[note.name] = 1
-    #
-    # print max(note_freq, key=note_freq.get)
+    notes = part.flat.getElementsByClass(music21.note.Note)
 
-    print len(part.notes)
+    note_dict = {}
+    note_freq = {}
+
+    for note in notes:
+        if note.name in note_dict:
+            note_dict[note.name] += note.duration.quarterLength
+            note_freq[note.name] += 1
+
+        else:
+            note_dict[note.name] = note.duration.quarterLength
+            note_freq[note.name] = 1
+
+    total = note_freq
+
+    for note in total:
+        total[note] += note_dict[note]
+
+    return max(total, key=total.get)
 
 
 def main():
