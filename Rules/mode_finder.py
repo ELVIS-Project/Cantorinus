@@ -255,51 +255,50 @@ def characteristic(part):
 
 def main():
 
-    # pieces = {
-    #     'Cantorinus/Rules/music/lhomme_arme.mei': 'mixolydian',
-    #     'Cantorinus/Rules/music/kyrie_cumjubilo.mei': 'dorian & hypodorian',
-    #     'Cantorinus/Rules/music/kyrie_deangelis.mei': 'lydian',
-    #     'Cantorinus/Rules/music/christlag.mei': 'dorian',
-    #     'Cantorinus/Rules/music/kyrie_dedominica.mei': 'aeolian',
-    #     'Cantorinus/Rules/music/la_spagna.mei': 'dorian',
-    #     'Cantorinus/Rules/music/vater_unser.mei': 'dorian',
-    #     'Cantorinus/Rules/music/da_jesus.mei': 'phrygian'
-    # }
-    pieces = ['Cantorinus/Rules/music/lhomme_arme.mei', 'Cantorinus/Rules/music/L_homme_arme.mxl']
+    place = 'Cantorinus/Rules/music/'
+
+    pieces = {
+        'lhomme_arme': 'mixolydian',
+        'kyrie_cumjubilo': 'dorian & hypodorian',
+        'kyrie_deangelis': 'lydian',
+        'christlag': 'dorian',
+        'kyrie_dedominica': 'aeolian',
+        'la_spagna': 'dorian',
+        'vater_unser': 'dorian',
+        'da_jesus': 'phrygian'
+    }
 
     for piece in pieces:
 
-        print(piece)
-
-        the_score = music21.converter.parse(piece)
+        the_score = music21.converter.parse(place + piece + '.mei')
         the_notes = noterest.NoteRestIndexer(the_score).run()
 
         # currently assuming that the piece only has one part
         part_notes = the_notes['noterest.NoteRestIndexer']['0'].tolist()
 
-        characteristic(part_notes)
+        fin = finalis(part_notes)
+        p_range = pitch_range(the_score.parts[0])
+        p_range = p_range[0].nameWithOctave, p_range[1].nameWithOctave
+        r_type = 'authentic'
 
-        # fin = finalis(part_notes)
-        # p_range = pitch_range(the_score.parts[0])
-        # p_range = p_range[0].nameWithOctave, p_range[1].nameWithOctave
-        # r_type = 'authentic'
-        #
-        # with open(piece + '.csv', 'wb') as csvfile:
-        #     writer = csv.writer(csvfile)
-        #     writer.writerow([
-        #         'finalis',
-        #         'pitch range',
-        #         'range type',
-        #         'species',
-        #         'characteristic note'
-        #         ])
-        #     writer.writerow([
-        #         fin.name,
-        #         p_range,
-        #         r_type,
-        #         species(part_notes, fin, r_type),
-        #         characteristic(part_notes)
-        #     ])
+        output = 'Cantorinus/Rules/output/'
+
+        with open(output + piece + '.csv', 'wb') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([
+                'finalis',
+                'pitch range',
+                'range type',
+                'species',
+                'characteristic note'
+                ])
+            writer.writerow([
+                fin.name,
+                p_range,
+                r_type,
+                species(part_notes, fin, r_type),
+                characteristic(the_score)
+            ])
 
 
 if __name__ == '__main__':
