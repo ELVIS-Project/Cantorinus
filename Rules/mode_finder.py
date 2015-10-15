@@ -50,6 +50,14 @@ def pitch_range(part):
     return p_range[0], p_range[1]
 
 
+def range_type(part, p_range, fin):
+
+    intv = music21.interval.Interval(p_range[0], p_range[1])
+
+    if fin in p_range:
+        return 'authentic'
+
+
 def _merge_sort(notes):
 
     if len(notes) <= 1:
@@ -257,16 +265,16 @@ def main():
 
     place = 'Cantorinus/Rules/music/'
 
-    pieces = {
-        'lhomme_arme': 'mixolydian',
-        'kyrie_cumjubilo': 'dorian & hypodorian',
-        'kyrie_deangelis': 'lydian',
-        'christlag': 'dorian',
-        'kyrie_dedominica': 'aeolian',
-        'la_spagna': 'dorian',
-        'vater_unser': 'dorian',
-        'da_jesus': 'phrygian'
-    }
+    pieces = [
+        'lhomme_arme',
+        'kyrie_cumjubilo',
+        'kyrie_deangelis',
+        'christlag',
+        'kyrie_dedominica',
+        'la_spagna',
+        'vater_unser',
+        'da_jesus'
+    ]
 
     for piece in pieces:
 
@@ -278,8 +286,8 @@ def main():
 
         fin = finalis(part_notes)
         p_range = pitch_range(the_score.parts[0])
-        p_range = p_range[0].nameWithOctave, p_range[1].nameWithOctave
-        r_type = 'authentic'
+        p_range = p_range[0], p_range[1]
+        r_type = range_type(part_notes, p_range, fin)
 
         output = 'Cantorinus/Rules/output/'
 
@@ -291,7 +299,7 @@ def main():
                 'range type',
                 'species',
                 'characteristic note'
-                ])
+            ])
             writer.writerow([
                 fin.name,
                 p_range,
