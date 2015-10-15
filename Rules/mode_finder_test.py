@@ -6,9 +6,6 @@ from vis.analyzers.indexers import noterest
 
 class ModeFinderTest(unittest.TestCase):
 
-    part_notes = 0
-    the_score = 0
-
     def setUp(self):
 
         piece = 'music/christlag.mei'
@@ -39,7 +36,7 @@ class ModeFinderTest(unittest.TestCase):
 
     def test_characteristic(self):
 
-        self.assertEqual(mode_finder.characteristic(part_notes), 'A')
+        self.assertEqual(mode_finder.characteristic(the_score), 'A')
 
     def test_smaller(self):
 
