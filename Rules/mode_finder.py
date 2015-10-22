@@ -48,16 +48,25 @@ def pitch_range(part):
     return p_range[0], p_range[1]
 
 
-def range_type(part, p_range, fin):
+def range_type(p_range):
     """
     The range_type() functions decides if the range is complete (within a 10th),
     excessive (larger than a 10th), or incomplete (smaller than an octave).
     """
 
     intv = music21.interval.Interval(p_range[0], p_range[1])
+    smtns = intv.generic.undirected
 
-    if fin in p_range:
-        return 'authentic'
+    if 8 <= smtns <= 10:
+        r_type = 'complete'
+
+    elif smtns >= 11:
+        r_type = 'excessive'
+
+    else:
+        r_type = 'incomplete'
+
+    return r_type
 
 
 def _merge_sort(notes):
