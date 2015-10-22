@@ -143,7 +143,7 @@ def species(part, fin, r_type):
 
     """
 
-    notes = spec_prep(part)
+    notes = part
 
     fifth = []
     start = notes.index(fin)
@@ -160,7 +160,7 @@ def species(part, fin, r_type):
 
     fourth = []
 
-    if r_type == 'authentic':
+    if r_type == 'complete':
 
         f_start = stop
         f_stop = len(notes)
@@ -315,8 +315,10 @@ def main():
 
         fin = finalis(part_notes)
         p_range = pitch_range(the_score.parts[0])
-        p_range = p_range[0], p_range[1]
-        r_type = range_type(part_notes, p_range, fin)
+
+        notes = spec_prep(part_notes)
+        r_type = range_type(p_range)
+        spec = species(notes, fin, r_type)
 
         output = 'Cantorinus/Rules/output/'
 
@@ -324,16 +326,20 @@ def main():
             writer = csv.writer(csvfile)
             writer.writerow([
                 'finalis',
-                'pitch range',
+                'bottom note',
+                'top note',
                 'range type',
-                'species',
+                'species of fourths',
+                'species of fifths',
                 'characteristic note'
             ])
             writer.writerow([
                 fin.name,
-                p_range,
+                p_range[0],
+                p_range[1],
                 r_type,
-                species(part_notes, fin, r_type),
+                spec[1],
+                spec[0],
                 characteristic(the_score)
             ])
 
