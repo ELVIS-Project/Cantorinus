@@ -7,6 +7,9 @@ from vis.analyzers.indexers import noterest
 class ModeFinderTest(unittest.TestCase):
 
     def setUp(self):
+        """
+        setUp() creates global variables for the unittests.
+        """
 
         piece = 'music/christlag.mei'
         global the_score
@@ -16,6 +19,9 @@ class ModeFinderTest(unittest.TestCase):
         part_notes = the_notes['noterest.NoteRestIndexer']['0'].tolist()
 
     def test_finalis(self):
+        """
+        test_finalis() checks if finalis() returns D4
+        """
 
         d4 = music21.note.Note('D4')
         global fin
@@ -23,6 +29,9 @@ class ModeFinderTest(unittest.TestCase):
         self.assertEqual(finalis(part_notes), d4)
 
     def test_pitch_range(self):
+        """
+        test_pitch_range() checks if pitch_range() returns D4 and E5
+        """
 
         part = the_score.parts[0]
         d4 = music21.note.Note('D4')
@@ -32,21 +41,38 @@ class ModeFinderTest(unittest.TestCase):
         self.assertEqual(pitch_range(part), (d4, e5))
 
     def test_range_type(self):
+        """
+        test_range_type() checks if range_type() returns 'complete'
+        """
 
         self.assertEqual(range_type(part_notes, p_range, fin), 'authentic')
 
     def test_species(self):
+        """
+        test_species() checks if species() returns ['T', 'S', 'T', 'T'],
+        ['T', 'S', 'T']
+        """
 
         sp = ['T', 'S', 'T', 'T'], ['T', 'S', 'T']
         d4 = music21.note.Note('D4')
         r_type = 'authentic'
         self.assertEqual(species(part_notes, d4, r_type), sp)
+        """
+        test_spec_prep() checks if spec_prep() returns the sorted range,
+        ['D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5']
+        """
 
     def test_characteristic(self):
+        """
+        test_characteristic() checks if characteristic() returns A
+        """
 
         self.assertEqual(characteristic(the_score), 'A')
 
     def test_smaller(self):
+        """
+        test_smaller() checks if smaller() returns E4
+        """
 
         a4 = music21.note.Note('A4')
         e4 = music21.note.Note('E4')

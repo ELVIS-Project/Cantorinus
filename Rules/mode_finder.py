@@ -3,17 +3,16 @@ from vis.analyzers.indexers import noterest
 import csv
 
 
-# Rule 1: The final note in a melodic line. If the line ends on D, the mode is
-# first or second; E, third or fourth; F, fifth or sixth; G, seventh or eighth;
-# A, ninth or tenth; C, eleventh or twelfth. Each mode also has a Greek name.
-
-
 def finalis(part):
-
     """
     The finalis() function finds and returns a note object of the last note in
     a part.
+    Rule 1: The final note in a melodic line. If the line ends on D, the mode is
+    first or second; E, third or fourth; F, fifth or sixth; G, seventh or
+    eighth; A, ninth or tenth; C, eleventh or twelfth. Each mode also has a
+    Greek name.
     """
+
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
@@ -24,22 +23,21 @@ def finalis(part):
     return music21.note.Note(part[last])
 
 
-# Rule 2: The range of the line. It is normally an octave, built either above
-# the final or above the fourth below the final. The former is the range of the
-# authentic, add-numbered modes; the latter the plagal, or even-numbered modes.
-# In the Greek nomenclature, the names of the plagal modes begin with the prefix
-# 'hypo-' ('below'). The last note (final) in a plagal melody lies in the
-# middle of the range; in an authentic melody, at the bottom. In practice,
-# the modal octave may be exceeded by a step at either end. If the melody goes
-# farther than that, the mode is called 'excessive'; if the melody covers both
-# the plagal and authentic ranges, its mode is said to be 'mixed'; if the melody
-# covers less than an octave, it is called 'incomplete.'
-
-
 def pitch_range(part):
     """
     The pitch_range() function returns note names of the upper and lower most
     notes in the part.
+    Rule 2: The range of the line. It is normally an octave, built either above
+    the final or above the fourth below the final. The former is the range of
+    the authentic, add-numbered modes; the latter the plagal, or even-numbered
+    modes. In the Greek nomenclature, the names of the plagal modes begin with
+    the prefix 'hypo-' ('below'). The last note (final) in a plagal melody lies
+    in the middle of the range; in an authentic melody, at the bottom. In
+    practice, the modal octave may be exceeded by a step at either end. If the
+    melody goes farther than that, the mode is called 'excessive'; if the melody
+    covers both the plagal and authentic ranges, its mode is said to be 'mixed';
+    if the melody covers less than an octave, it is called 'incomplete.'
+
     """
     if "Rest" in part:
         while "Rest" in part:
@@ -51,6 +49,10 @@ def pitch_range(part):
 
 
 def range_type(part, p_range, fin):
+    """
+    The range_type() functions decides if the range is complete (within a 10th),
+    excessive (larger than a 10th), or incomplete (smaller than an octave).
+    """
 
     intv = music21.interval.Interval(p_range[0], p_range[1])
 
@@ -59,6 +61,9 @@ def range_type(part, p_range, fin):
 
 
 def _merge_sort(notes):
+    """
+    _merge_sort() is an internal function that sorts notes by pitch.
+    """
 
     if len(notes) <= 1:
         return notes
@@ -87,6 +92,9 @@ def _merge_sort(notes):
 
 
 def _merge(left, right):
+    """
+    _merge() is only used by _merge_sort() to merge the two lists.
+    """
 
     result = []
 
@@ -108,19 +116,23 @@ def _merge(left, right):
     return result
 
 
-# The species of fourths and fifths. The types ('species') of fourth and fifth
-# are numbered according to the positions of the semitones and tones enclosed
-# within them (T = whole tone, S = semitone). For instance, the TTST fifth is
-# called a 'fourth species fifth' and it occurs in two locations in the natural
-# diatonic system (some species of interval only occur in one location). When a
-# species of interval is characteristic of more than one mode, the whole octave
-# must be examined to determine the mode. The species of fourth and fifth give
-# a mode its 'sound,' so you should learn to sing the different species and to
-# identify them aurally. The end points of the various species of interval can
-# be stressed by skipping to and from them or by using them as turning points
-# in a melody.
-
 def species(part, fin, r_type):
+    """
+    The species() function finds the species of fourths and fifths in the piece
+    and returns them in lists of tones and semitones.
+    Rule 3: The species of fourths and fifths. The types ('species') of fourth
+    and fifth are numbered according to the positions of the semitones and tones
+    enclosed within them (T = whole tone, S = semitone). For instance, the TTST
+    fifth is called a 'fourth species fifth' and it occurs in two locations in
+    the natural diatonic system (some species of interval only occur in one
+    location). When a species of interval is characteristic of more than one
+    mode, the whole octave must be examined to determine the mode. The species
+    of fourth and fifth give a mode its 'sound,' so you should learn to sing the
+    different species and to identify them aurally. The end points of the
+    various species of interval can be stressed by skipping to and from them or
+    by using them as turning points in a melody.
+
+    """
 
     notes = spec_prep(part)
 
@@ -177,6 +189,11 @@ def species(part, fin, r_type):
 
 
 def spec_prep(part):
+    """
+    spec_prep() prepares the notes in the part for other functions to use. It
+    removes all rests, turns the pitches into music21 note objects, sorts them
+    and removes all duplicate notes.
+    """
 
     notes = []
 
@@ -208,6 +225,10 @@ def spec_prep(part):
 
 
 def smaller(part, note1, note2):
+    """
+    smaller() finds and returns the less frequently occurring of two notes in a
+    given part.
+    """
 
     note1_tally = 0
     note2_tally = 0
@@ -226,17 +247,16 @@ def smaller(part, note1, note2):
         return note2
 
 
-# Characteristic notes. The end points of the characteristic species of fourth
-# and fifth are the characteristic notes of the mode. They are always the final
-# and the fifth above (or the fourth below) the final. Thus if we hear or see a
-# melody that is continually emphasizing the notes E and B, we can be sure that
-# melody is either in the Phrygian mode or the Hypophrigian.
-
-
 def characteristic(part):
     """
     characteristic() finds and returns the 'characteristic' note, a note that
-    occurs often and has the longest total duration of being played
+    occurs often and has the longest total duration of being played.
+    Characteristic notes. The end points of the characteristic species of fourth
+    and fifth are the characteristic notes of the mode. They are always the
+    final and the fifth above (or the fourth below) the final. Thus if we hear
+    or see a melody that is continually emphasizing the notes E and B, we can be
+    sure that melody is either in the Phrygian mode or the Hypophrigian.
+
     """
 
     notes = part.flat.getElementsByClass(music21.note.Note)
