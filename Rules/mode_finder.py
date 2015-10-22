@@ -125,7 +125,7 @@ def _merge(left, right):
     return result
 
 
-def species(part, fin, r_type):
+def species(notes, fin, r_type):
     """
     The species() function finds the species of fourths and fifths in the piece
     and returns them in lists of tones and semitones.
@@ -143,7 +143,7 @@ def species(part, fin, r_type):
 
     """
 
-    notes = part
+
 
     fifth = []
     fourth = []
@@ -157,6 +157,9 @@ def species(part, fin, r_type):
 
     if stop == -1:
         stop = len(notes)
+        for note in notes[0:start]:
+            if music21.interval.Interval(note, fin) == 'P4':
+                f_start = note
 
     for x in range(start, stop, 1):
 
@@ -210,7 +213,8 @@ def spec_prep(part):
 
     for note in part:
 
-        if note == "Rest":
+        note = str(note)
+        if note == "Rest" or note == 'nan':
             pass
         else:
             note = music21.note.Note(note)
@@ -304,23 +308,15 @@ def main():
         'kyrie_dedominica',
         'la_spagna',
         'vater_unser',
-        'da_jesus'
+        'da_jesus',
+        'pontio1a',
+        'pontio1b'
     ]
 
     for piece in pieces:
 
         the_score = music21.converter.parse(place + piece + '.mei')
         the_notes = noterest.NoteRestIndexer(the_score).run()
-
-        # currently assuming that the piece only has one part
-        part_notes = the_notes['noterest.NoteRestIndexer']['0'].tolist()
-
-        fin = finalis(part_notes)
-        p_range = pitch_range(the_score.parts[0])
-
-        notes = spec_prep(part_notes)
-        r_type = range_type(p_range)
-        spec = species(notes, fin, r_type)
 
         output = 'Cantorinus/Rules/output/'
 
@@ -335,15 +331,28 @@ def main():
                 'species of fifths',
                 'characteristic note'
             ])
-            writer.writerow([
-                fin.name,
-                p_range[0],
-                p_range[1],
-                r_type,
-                spec[1],
-                spec[0],
-                characteristic(the_score)
-            ])
+
+        for x in range(len(the_score.parts)):
+            part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
+
+            fin = finalis(part_notes)
+            p_range = pitch_range(the_score.parts[x])
+
+            notes = spec_prep(part_notes)
+            r_type = range_type(p_range)
+            spec = species(notes, fin, r_type)
+
+            with open(output + piece + '.csv', 'a') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([
+                    fin.name,
+                    p_range[0],
+                    p_range[1],
+                    r_type,
+                    spec[1],
+                    spec[0],
+                    characteristic(the_score)
+                ])
 
 
 if __name__ == '__main__':
