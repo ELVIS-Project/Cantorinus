@@ -146,19 +146,21 @@ def species(part, fin, r_type):
     notes = part
 
     fifth = []
+    fourth = []
+    stop = -1
     start = notes.index(fin)
-    stop = start + 4
 
-    for note in notes:
+    for note in notes[start:]:
 
         if music21.interval.Interval(note, fin) == 'P5':
             stop = notes.index(note)
 
-    for x in range(start, stop+1, 1):
+    if stop == -1:
+        stop = len(notes)
+
+    for x in range(start, stop, 1):
 
         fifth.append(notes[x])
-
-    fourth = []
 
     if r_type == 'complete':
 
