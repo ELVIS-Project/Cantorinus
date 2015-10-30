@@ -22,7 +22,6 @@ def finalis(part):
 
     return music21.note.Note(part[last])
 
-
 # Rule 2: The range of the line. It is normally an octave, built either above
 # the final or above the fourth below the final. The former is the range of the
 # authentic, add-numbered modes; the latter the plagal, or even-numbered modes.
@@ -33,7 +32,6 @@ def finalis(part):
 # farther than that, the mode is called 'excessive'; if the melody covers both
 # the plagal and authentic ranges, its mode is said to be 'mixed'; if the melody
 # covers less than an octave, it is called 'incomplete.'
-
 
 def pitch_range(part):
     """
@@ -48,17 +46,19 @@ def pitch_range(part):
     p_range = p.getPitchSpan(part)
     return p_range[0], p_range[1]
 
-
 def range_type(part, p_range, fin):
-
+    ''' 
+    Even helper functions need documentation strings, but that's OK I'm only presenting at SMT...
+    '''
     intv = music21.interval.Interval(p_range[0], p_range[1])
 
     if fin in p_range:
         return 'authentic'
 
-
 def _merge_sort(notes):
-
+    '''
+    Even helper functions need documentation strings.
+    '''
     if len(notes) <= 1:
         return notes
 
@@ -86,7 +86,9 @@ def _merge_sort(notes):
 
 
 def _merge(left, right):
-
+    '''
+    Oh, hello another function without a documentation string :(.
+    '''
     result = []
 
     while len(left) > 0 and len(right) > 0:
@@ -120,7 +122,9 @@ def _merge(left, right):
 # in a melody.
 
 def species(part, fin, r_type):
-
+    '''
+    Another missing docstring.
+    '''
     notes = spec_prep(part)
 
     fifth = []
@@ -176,7 +180,9 @@ def species(part, fin, r_type):
 
 
 def spec_prep(part):
-
+    '''
+    Hello, my name is spec_prep() function, and I'm missing a docstring.
+    '''
     notes = []
 
     for note in part:
@@ -207,6 +213,9 @@ def spec_prep(part):
 
 
 def smaller(part, note1, note2):
+    '''
+    The smaller() function also needs a document string.
+    '''
 
     note1_tally = 0
     note2_tally = 0
@@ -261,7 +270,10 @@ def characteristic(part):
 
 
 def main():
-
+    '''
+    Even the main function should have a documentation string.
+    '''
+    
     place = 'Cantorinus/Rules/music/'
 
     pieces = [
