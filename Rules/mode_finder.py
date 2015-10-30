@@ -2,17 +2,16 @@ import music21
 from vis.analyzers.indexers import noterest
 import csv
 
-
-# Rule 1: The final note in a melodic line. If the line ends on D, the mode is
-# first or second; E, third or fourth; F, fifth or sixth; G, seventh or eighth;
-# A, ninth or tenth; C, eleventh or twelfth. Each mode also has a Greek name.
-
-
 def finalis(part):
-
     """
-    The finalis() function finds and returns a note object of the last note in
-    a part.
+    The finalis() function is modeled after Peter Schubert's first rule. 
+    If the line ends on:
+    - D => first or second mode. 
+    - E => third or fourth mode.
+    - F => fifth or sixth mode.
+    - G => seventh or eighth mode.
+    - A => ninth or tenth mode.
+    - C => eleventh or twelfth mode.
     """
     if "Rest" in part:
         while "Rest" in part:
