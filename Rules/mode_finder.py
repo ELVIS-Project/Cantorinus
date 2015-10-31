@@ -48,7 +48,7 @@ def pitch_range(part):
 
 def range_type(part, p_range, fin):
     ''' 
-    Even helper functions need documentation strings, but that's OK I'm only presenting at SMT...
+    Even helper functions need documentation strings.
     '''
     intv = music21.interval.Interval(p_range[0], p_range[1])
 
