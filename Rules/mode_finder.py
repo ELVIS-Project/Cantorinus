@@ -25,11 +25,9 @@ def finalis(part):
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
-
-    # Finding the last event in a part.
-    last = len(part) - 1
-
-    return music21.note.Note(part[last])
+            
+    # Formatting note for further music21 use.
+    return music21.note.Note(part[-1])
 
 def pitch_range(part):
     """
