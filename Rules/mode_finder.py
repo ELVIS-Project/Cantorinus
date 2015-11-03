@@ -29,22 +29,22 @@ def finalis(part):
 
     return music21.note.Note(part[last])
 
-# Rule 2: The range of the line. It is normally an octave, built either above
-# the final or above the fourth below the final. The former is the range of the
-# authentic, add-numbered modes; the latter the plagal, or even-numbered modes.
-# In the Greek nomenclature, the names of the plagal modes begin with the prefix
-# 'hypo-' ('below'). The last note (final) in a plagal melody lies in the
-# middle of the range; in an authentic melody, at the bottom. In practice,
-# the modal octave may be exceeded by a step at either end. If the melody goes
-# farther than that, the mode is called 'excessive'; if the melody covers both
-# the plagal and authentic ranges, its mode is said to be 'mixed'; if the melody
-# covers less than an octave, it is called 'incomplete.'
-
 def pitch_range(part):
     """
-    The pitch_range() function returns note names of the upper and lower most
-    notes in the part.
+    The pitch_range() function is modeled after Peter Schubert's second 
+    rule:
+    Ambitus    => Range of PCs within a line; spans an octave.
+    Authentic  => The range includes PCs an octave above the finalis 
+                  (located at the bottom of the ambitus).
+    Plagal     => The range includes PCs an octave above the fourth below
+                  below the finalis. The finalis is within the middle of
+                  the ambitus.
+    Excessive  => If range of PCs in a line spans > octave.
+    Mixed      => If range of PCs in a line spans both authentic and 
+                  plagal ranges.
+    Incomplete => If range of PCs in a line spans < octave.
     """
+    
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
