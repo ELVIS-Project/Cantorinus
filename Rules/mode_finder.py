@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import music21
 from vis.analyzers.indexers import noterest
 import csv
