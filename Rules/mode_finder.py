@@ -5,19 +5,26 @@ import csv
 def finalis(part):
     """
     The finalis() function is modeled after Peter Schubert's first rule. 
-    If the line ends on:
+    If a line ends on:
     - D => first or second mode. 
     - E => third or fourth mode.
     - F => fifth or sixth mode.
     - G => seventh or eighth mode.
     - A => ninth or tenth mode.
     - C => eleventh or twelfth mode.
+    The 'part' argument is a part that has already been parsed by (1)
+    music21, and (2) the noterest indexer of the VIS-Framework. For
+    example if the indexed parts were called the_notes, then the 
+    following statement would be passed in for (here) the (soprano) part
+    as part:
+    the_notes['noterest.NoteRestIndexer']['0'].tolist()
     """
+    
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
 
-    # finds the last pitch (that is not a Rest) in the part
+    # Finding the last event in a part.
     last = len(part) - 1
 
     return music21.note.Note(part[last])
