@@ -4,6 +4,7 @@ import music21
 from vis.analyzers.indexers import noterest
 import csv
 
+
 def finalis(part):
     """
     The finalis() function is modeled after Peter Schubert's first rule.
@@ -29,6 +30,7 @@ def finalis(part):
     # Formatting note for further music21 use.
     return music21.note.Note(part[-1])
 
+
 def pitch_range(part):
     """
     The pitch_range() function is modeled after Peter Schubert's second 
@@ -53,6 +55,7 @@ def pitch_range(part):
     p_range = p.getPitchSpan(part)
     return p_range[0], p_range[1]
 
+
 def range_type(p_range):
     """
     The range_type() functions decides if the range is complete (within a 10th),
@@ -72,6 +75,7 @@ def range_type(p_range):
         r_type = 'incomplete'
 
     return r_type
+
 
 def _merge_sort(notes):
     """
@@ -294,12 +298,92 @@ def characteristic(part):
     return max(total, key=total.get)
 
 
-def main():
-    '''
-    Even the main function should have a documentation string.
-    '''
-    
+def twelve_mode(piece):
+    """
+    runs all the functions needed in the 12-mode system
+    """
+
     place = 'Cantorinus/Rules/music/'
+    the_score = music21.converter.parse(place + piece + '.mei')
+    the_notes = noterest.NoteRestIndexer(the_score).run()
+
+    output = 'Cantorinus/Rules/output/'
+
+    with open(output + piece + '_twelve.csv', 'wb') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([
+            'finalis',
+            'bottom note',
+            'top note',
+            'range type',
+            'species of fourths',
+            'species of fifths',
+            'characteristic note'
+        ])
+
+    for x in range(len(the_score.parts)):
+        part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
+
+        fin = finalis(part_notes)
+        p_range = pitch_range(the_score.parts[x])
+
+        notes = spec_prep(part_notes)
+        r_type = range_type(p_range)
+        spec = species(notes, fin, r_type)
+
+        with open(output + piece + '.csv', 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([
+                fin.name,
+                p_range[0],
+                p_range[1],
+                r_type,
+                spec[1],
+                spec[0],
+                characteristic(the_score)
+            ])
+
+
+def eight_mode(piece):
+    """
+    runs only the functions necessary for the 8-mode system
+    """
+
+    place = 'Cantorinus/Rules/music/'
+    the_score = music21.converter.parse(place + piece + '.mei')
+    the_notes = noterest.NoteRestIndexer(the_score).run()
+
+    output = 'Cantorinus/Rules/output/'
+
+    with open(output + piece + '_eight.csv', 'wb') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([
+            'finalis',
+            'range type',
+            'reciting tone'
+        ])
+
+    for x in range(len(the_score.parts)):
+        part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
+
+        fin = finalis(part_notes)
+        p_range = pitch_range(the_score.parts[x])
+
+        r_type = range_type(p_range)
+
+        with open(output + piece + '.csv', 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([
+                fin.name,
+                r_type,
+                characteristic(the_score)
+            ])
+
+
+def main():
+    """
+    Even the main function should have a documentation string.
+    """
 
     pieces = [
         'lhomme_arme',
@@ -316,44 +400,8 @@ def main():
 
     for piece in pieces:
 
-        the_score = music21.converter.parse(place + piece + '.mei')
-        the_notes = noterest.NoteRestIndexer(the_score).run()
-
-        output = 'Cantorinus/Rules/output/'
-
-        with open(output + piece + '.csv', 'wb') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow([
-                'finalis',
-                'bottom note',
-                'top note',
-                'range type',
-                'species of fourths',
-                'species of fifths',
-                'characteristic note'
-            ])
-
-        for x in range(len(the_score.parts)):
-            part_notes = the_notes['noterest.NoteRestIndexer'][str(x)].tolist()
-
-            fin = finalis(part_notes)
-            p_range = pitch_range(the_score.parts[x])
-
-            notes = spec_prep(part_notes)
-            r_type = range_type(p_range)
-            spec = species(notes, fin, r_type)
-
-            with open(output + piece + '.csv', 'a') as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerow([
-                    fin.name,
-                    p_range[0],
-                    p_range[1],
-                    r_type,
-                    spec[1],
-                    spec[0],
-                    characteristic(the_score)
-                ])
+        twelve_mode(piece)
+        eight_mode(piece)
 
 
 if __name__ == '__main__':
