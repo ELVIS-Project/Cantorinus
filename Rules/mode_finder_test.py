@@ -3,9 +3,10 @@ from mode_finder import *
 import music21
 from vis.analyzers.indexers import noterest
 
-
 class ModeFinderTest(unittest.TestCase):
-
+    '''
+    Classes also contain docstrings, even if they are out of the box unit tests.
+    '''
     def setUp(self):
         """
         setUp() creates global variables for the unittests.
@@ -23,9 +24,9 @@ class ModeFinderTest(unittest.TestCase):
             notes.append(music21.note.Note(note))
 
     def test_finalis(self):
-        """
-        test_finalis() checks if finalis() returns D4
-        """
+        '''
+        The test_finalis() tests the finalis() function by equality.
+        '''
 
         d4 = music21.note.Note('D4')
         global fin
@@ -33,9 +34,9 @@ class ModeFinderTest(unittest.TestCase):
         self.assertEqual(finalis(part_notes), d4)
 
     def test_pitch_range(self):
-        """
-        test_pitch_range() checks if pitch_range() returns D4 and E5
-        """
+        '''
+        The test_pitch_range() function tests the pitch_range() function by equality.
+        '''
 
         part = the_score.parts[0]
         d4 = music21.note.Note('D4')

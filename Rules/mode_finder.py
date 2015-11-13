@@ -25,16 +25,16 @@ def finalis(part):
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
-
-    # Formatting note for further music21 use
+            
+    # Formatting note for further music21 use.
     return music21.note.Note(part[-1])
 
 def pitch_range(part):
     """
-    The pitch_range() function is modeled after Peter Schubert's second
+    The pitch_range() function is modeled after Peter Schubert's second 
     rule:
     Ambitus    => Range of PCs within a line; spans an octave.
-    Authentic  => The range includes PCs an octave above the finalis
+    Authentic  => The range includes PCs an octave above the finalis 
                   (located at the bottom of the ambitus).
     Plagal     => The range includes PCs an octave above the fourth below
                   below the finalis. The finalis is within the middle of
@@ -73,12 +73,10 @@ def range_type(p_range):
 
     return r_type
 
-
 def _merge_sort(notes):
     """
     _merge_sort() is an internal function that sorts notes by pitch.
     """
-
     if len(notes) <= 1:
         return notes
 
@@ -144,7 +142,6 @@ def species(notes, fin, r_type):
     different species and to identify them aurally. The end points of the
     various species of interval can be stressed by skipping to and from them or
     by using them as turning points in a melody.
-
     """
 
     fifth = []
@@ -210,7 +207,6 @@ def spec_prep(part):
     removes all rests, turns the pitches into music21 note objects, sorts them
     and removes all duplicate notes.
     """
-
     notes = []
 
     for note in part:
@@ -299,7 +295,10 @@ def characteristic(part):
 
 
 def main():
-
+    '''
+    Even the main function should have a documentation string.
+    '''
+    
     place = 'Cantorinus/Rules/music/'
 
     pieces = [
