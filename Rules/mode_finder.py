@@ -1,44 +1,50 @@
+# -*- coding: utf-8 -*-
+
 import music21
 from vis.analyzers.indexers import noterest
 import csv
 
-
 def finalis(part):
     """
-    The finalis() function finds and returns a note object of the last note in
-    a part.
-    Rule 1: The final note in a melodic line. If the line ends on D, the mode is
-    first or second; E, third or fourth; F, fifth or sixth; G, seventh or
-    eighth; A, ninth or tenth; C, eleventh or twelfth. Each mode also has a
-    Greek name.
+    The finalis() function is modeled after Peter Schubert's first rule.
+    If a line ends on:
+    - D => first or second mode.
+    - E => third or fourth mode.
+    - F => fifth or sixth mode.
+    - G => seventh or eighth mode.
+    - A => ninth or tenth mode.
+    - C => eleventh or twelfth mode.
+    The 'part' argument is a part that has already been parsed by (1)
+    music21, and (2) the noterest indexer of the VIS-Framework. For
+    example if the indexed parts were called the_notes, then the
+    following statement would be passed in for (here) the (soprano) part
+    as part:
+    the_notes['noterest.NoteRestIndexer']['0'].tolist()
     """
 
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
 
-    # finds the last pitch (that is not a Rest) in the part
-    last = len(part) - 1
-
-    return music21.note.Note(part[last])
-
+    # Formatting note for further music21 use
+    return music21.note.Note(part[-1])
 
 def pitch_range(part):
     """
-    The pitch_range() function returns note names of the upper and lower most
-    notes in the part.
-    Rule 2: The range of the line. It is normally an octave, built either above
-    the final or above the fourth below the final. The former is the range of
-    the authentic, add-numbered modes; the latter the plagal, or even-numbered
-    modes. In the Greek nomenclature, the names of the plagal modes begin with
-    the prefix 'hypo-' ('below'). The last note (final) in a plagal melody lies
-    in the middle of the range; in an authentic melody, at the bottom. In
-    practice, the modal octave may be exceeded by a step at either end. If the
-    melody goes farther than that, the mode is called 'excessive'; if the melody
-    covers both the plagal and authentic ranges, its mode is said to be 'mixed';
-    if the melody covers less than an octave, it is called 'incomplete.'
-
+    The pitch_range() function is modeled after Peter Schubert's second
+    rule:
+    Ambitus    => Range of PCs within a line; spans an octave.
+    Authentic  => The range includes PCs an octave above the finalis
+                  (located at the bottom of the ambitus).
+    Plagal     => The range includes PCs an octave above the fourth below
+                  below the finalis. The finalis is within the middle of
+                  the ambitus.
+    Excessive  => If range of PCs in a line spans > octave.
+    Mixed      => If range of PCs in a line spans both authentic and
+                  plagal ranges.
+    Incomplete => If range of PCs in a line spans < octave.
     """
+
     if "Rest" in part:
         while "Rest" in part:
             part.remove("Rest")
@@ -46,7 +52,6 @@ def pitch_range(part):
     p = music21.analysis.discrete.Ambitus()
     p_range = p.getPitchSpan(part)
     return p_range[0], p_range[1]
-
 
 def range_type(p_range):
     """
@@ -104,7 +109,6 @@ def _merge(left, right):
     """
     _merge() is only used by _merge_sort() to merge the two lists.
     """
-
     result = []
 
     while len(left) > 0 and len(right) > 0:
@@ -142,8 +146,6 @@ def species(notes, fin, r_type):
     by using them as turning points in a melody.
 
     """
-
-
 
     fifth = []
     fourth = []
