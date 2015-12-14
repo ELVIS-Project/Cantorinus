@@ -1,12 +1,14 @@
 # Cantorinus
 ## Rule and Profile Based Mode Finding Algorithms
 
-The first mission of the *Cantorinus* project is to assemble rule based mode finding algorithms. The first set of algorithms *Glareanus* will determine a mode according to the paraphrased rules of Glareanus' *Dodecachordon* found in Peter Schubert's *Modal Counterpoint, Renaissance Style* book.
+1. The first mission of the *Cantorinus* project is to gather the ΔΩΔΕΚΑΧΟΡΔΟΝ (Dodecachordon) dataset. The dataset consists of all monophonic, and polyphonic compositions listed in Glarean's ΔΩΔΕΚΑΧΟΡΔΟΝ.
 
-Once the rule based algorithms have been put into place, a large corpus based study will be conducted in order to create modal profiles for each of the rule based mode algorithm. The resulting mode profiles can then be used to determine the mode of unknown pieces.
+2. Next the *Cantorinus* project is to assemble rule based mode finding algorithms. 
+- The first set of heuristic algorithms are adapted from Peter Schubert's *Modal Counterpoint, Renaissance Style* book. 
+- The second set of heuristic algorithms are based on Glarean's ΔΩΔΕΚΑΧΟΡΔΟΝ treatise from 1547. 
 
-## Organization
-- Hadoop: Contains relevant hadoop python files.
-- Profiles: Contains the resulting modal profiles.
-- Rules: Contains the rule based modal finding algorithms.
+3. Once both tasks have been completed different types of machine learning algorithms will be applied to the dataset, and a test set.
+- Supervised/guided machine learning
+- Semi-supervised machine learning
+- Unsupervised machine learning
 
